@@ -6,6 +6,7 @@ import (
 
 	"github.com/Ronald545/todo-app/handlers"
 	"github.com/gofiber/fiber/v2"
+	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -32,23 +33,34 @@ func main() {
 }
 
 func router(app *fiber.App) {
+
+	JWT_SECRET := os.Getenv("JWT_SECRET")
+
+	api := app.Group("/task", jwtware.New(jwtware.Config{
+		SigningKey: []byte(JWT_SECRET),
+	}))
+
+	auth := app.Group("/auth")
+
 	// tasks
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Welcome to the TODO API")
-	})
+	api.Get("/", Handlers.FindTask)
 
-	app.Get("/task", Handlers.FindTask)
+	api.Post("/", Handlers.CreateTask)
 
-	app.Post("/task", Handlers.CreateTask)
+	api.Delete("/:id", Handlers.DeleteTask)
 
-	app.Delete("/task/:id", Handlers.DeleteTask)
-
-	app.Put("/task", Handlers.EditTask)
+	api.Put("/", Handlers.EditTask)
 
 	// auth
-	app.Get("/users", Handlers.FindAllUsers)
 
-	app.Post("/signup", Handlers.CreateUser)
+	auth.Post("/login", Handlers.LoginUser)
+
+	auth.Post("/signup", Handlers.CreateUser)
+
+	// dev
+	app.Get("/allTasks", Handlers.FindAllTasks)
+
+	app.Get("/allUsers", Handlers.FindAllUsers)
 
 	app.Delete("/users", Handlers.DeleteUser)
 }
