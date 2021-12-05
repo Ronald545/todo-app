@@ -1,19 +1,19 @@
 package Models
 
 import (
-  "github.com/kamva/mgm/v3"
+	"github.com/kamva/mgm/v3"
 )
 
-// Model Definition 
+// Model Definition
 type Task struct {
-  mgm.DefaultModel `bson:",inline"`
-  Name string `json:"name" bson:"name"`
-  Description string `json:"description" bson:"description"`
+	mgm.DefaultModel `bson:",inline"`
+	Name             string `json:"name" bson:"name"`
+	Description      string `json:"description" bson:"description"`
 }
 
 func NewTask(name string, description string) *Task {
-  return &Task{
-    Name: name,
-    Description: description,
-  }
+	return &Task{
+		Name:        name,
+		Description: description,
+	}
 }

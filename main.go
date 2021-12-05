@@ -12,35 +12,43 @@ import (
 )
 
 func main() {
-  // loading env secrets
-  err := godotenv.Load()
-  if err != nil {
-    log.Fatal("Error loading .env file")
-  }
-  
-  URI := os.Getenv("MONGO_URI")
-  DB := os.Getenv("MONGO_DB")
-  
-  // setup orm and server
-  mgm.SetDefaultConfig(nil, DB, options.Client().ApplyURI(URI))
+	// loading env secrets
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-  app := fiber.New()
+	URI := os.Getenv("MONGO_URI")
+	DB := os.Getenv("MONGO_DB")
 
-  router(app)
+	// setup orm and server
+	mgm.SetDefaultConfig(nil, DB, options.Client().ApplyURI(URI))
 
-  app.Listen(":3000")
+	app := fiber.New()
+
+	router(app)
+
+	app.Listen(":3000")
 }
 
 func router(app *fiber.App) {
-  app.Get("/", func(c *fiber.Ctx) error {
-    return c.SendString("Welcome to the TODO API")
-  })
+	// tasks
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Welcome to the TODO API")
+	})
 
-  app.Get("/task", Handlers.FindTask)
+	app.Get("/task", Handlers.FindTask)
 
-  app.Post("/task", Handlers.CreateTask)
+	app.Post("/task", Handlers.CreateTask)
 
-  app.Delete("/task/:id", Handlers.DeleteTask)
+	app.Delete("/task/:id", Handlers.DeleteTask)
 
-  app.Put("/task", Handlers.EditTask)
+	app.Put("/task", Handlers.EditTask)
+
+	// auth
+	app.Get("/users", Handlers.FindAllUsers)
+
+	app.Post("/signup", Handlers.CreateUser)
+
+	app.Delete("/users", Handlers.DeleteUser)
 }
