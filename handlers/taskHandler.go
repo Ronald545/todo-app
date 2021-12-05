@@ -1,4 +1,4 @@
-package taskHandler
+package Handlers
 
 import (
   "github.com/Ronald545/todo-app/models"
@@ -14,8 +14,8 @@ type request struct {
 }
 
 func FindTask (c *fiber.Ctx) error {
-  result := []taskModel.Task{}
-  err := mgm.Coll(&taskModel.Task{}).SimpleFind(&result, bson.M{})
+  result := []Models.Task{}
+  err := mgm.Coll(&Models.Task{}).SimpleFind(&result, bson.M{})
   if err != nil {
     return respond(c, 500, "an error occured while trying to find tasks")
   }
@@ -26,12 +26,12 @@ func FindTask (c *fiber.Ctx) error {
 
 func CreateTask (c *fiber.Ctx) error {
   // retrieving json
-  t := new(taskModel.Task)
+  t := new(Models.Task)
   if err := c.BodyParser(t); err != nil {
     return respond(c, 400, "an error occured while parsing json body")
   }
   // saving into db
-  task := taskModel.NewTask(t.Name,t.Description)
+  task := Models.NewTask(t.Name,t.Description)
   if err := mgm.Coll(task).Create(task); err != nil {
     return respond(c, 500, "an error occured when saving the task")
   }
@@ -42,7 +42,7 @@ func CreateTask (c *fiber.Ctx) error {
 
 func DeleteTask (c *fiber.Ctx) error {
   // retrieve id
-  task := &taskModel.Task{}
+  task := &Models.Task{}
   coll := mgm.Coll(task)
   if err := coll.FindByID(c.Params("id"), task); err != nil {
     return respond(c, 400, err.Error())
@@ -57,7 +57,7 @@ func DeleteTask (c *fiber.Ctx) error {
 
 func EditTask (c *fiber.Ctx) error {
   // retrieve json body
-  task := &taskModel.Task{}
+  task := &Models.Task{}
   coll := mgm.Coll(task)
   b := new(request)
 

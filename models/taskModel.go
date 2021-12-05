@@ -1,4 +1,4 @@
-package taskModel
+package Models
 
 import (
   "github.com/kamva/mgm/v3"
