@@ -7,6 +7,7 @@ import (
 	"github.com/Ronald545/todo-app/handlers"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
+  "github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,6 +27,8 @@ func main() {
 	mgm.SetDefaultConfig(nil, DB, options.Client().ApplyURI(URI))
 
 	app := fiber.New()
+
+  app.Use(cors.New())
 
 	router(app)
 

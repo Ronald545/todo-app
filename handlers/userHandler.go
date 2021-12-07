@@ -45,7 +45,7 @@ func LoginUser(c *fiber.Ctx) error {
 	err = bcrypt.CompareHashAndPassword([]byte(result[0].Password), []byte(u.Password))
 
 	if err != nil {
-		return respond(c, 400, "password incorrect, you are not authorized to delete this account")
+		return respond(c, 400, "password incorrect, you are not authorized")
 	}
 
 	// Create the Claims
