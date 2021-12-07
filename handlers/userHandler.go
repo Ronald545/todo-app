@@ -62,7 +62,15 @@ func LoginUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
+  
+  cookie := new(fiber.Cookie)
+  cookie.Name = "todo-auth"
+  cookie.Value = t
+  cookie.Expires = time.Now().Add(72 * time.Hour)
+  cookie.Domain = "localhost"
 
+  c.SendStatus(200)
+  c.Cookie(cookie)
 	return c.JSON(fiber.Map{"token": t})
 }
 

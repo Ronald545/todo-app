@@ -1,30 +1,19 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { fade } from 'svelte/transition'
-  import { jwt } from '../stores/jwt'
   let server = 'http://localhost:5000'
   $: data = []
   let name = ''
   let description = ''
 
-  let jwt_value = ''
   onMount(async () => {
-    let unsub = jwt.subscribe(value => {
-      jwt_value += value
-      loadTasks()
-    })
-    unsub()
+    loadTasks()
   })
-  if (jwt_value == "<empty_string>") {
-    alert("user not logged in")
-  }
 
   async function loadTasks() {
     let res = await fetch(server + "/task", {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${jwt_value}`
-      }
+      credentials: 'include'
     })
     
     if (res.ok) {
@@ -43,9 +32,9 @@
       method: 'POST',
       body: JSON.stringify({ name, description }),
       headers: {
-        'Authorization': `Bearer ${jwt_value}`,
         'Content-Type':'application/json'
-      }
+      },
+      credentials: 'include'
     })
     
     if (res.ok) {
@@ -59,9 +48,7 @@
 
     let res = await fetch(server + `/task/${task.id}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${jwt_value}`
-      }
+      credentials: 'include'
     })
 
     if (res.ok) {

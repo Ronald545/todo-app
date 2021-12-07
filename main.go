@@ -1,13 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/Ronald545/todo-app/handlers"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	jwtware "github.com/gofiber/jwt/v3"
-  "github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	"github.com/kamva/mgm/v3"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -28,7 +29,9 @@ func main() {
 
 	app := fiber.New()
 
-  app.Use(cors.New())
+  app.Use(cors.New(cors.Config{
+    AllowCredentials: true,
+  }))
 
 	router(app)
 
@@ -38,8 +41,16 @@ func main() {
 func router(app *fiber.App) {
 
 	JWT_SECRET := os.Getenv("JWT_SECRET")
-
-	api := app.Group("/task", jwtware.New(jwtware.Config{
+  
+	api := app.Group("/task")
+  
+  api.Use(func (c *fiber.Ctx) error {
+    cookie := c.Cookies("todo-auth")
+    c.Request().Header.Add("Authorization", fmt.Sprintf("Bearer %v", cookie))
+    return c.Next()
+  })
+  
+  api.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte(JWT_SECRET),
 	}))
 

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { fade } from 'svelte/transition'
   import { goto } from '$app/navigation';
-  import { jwt } from '../stores/jwt.js'
   let server = "http://localhost:5000"
   let username = ''
   let password = ''
@@ -20,14 +19,14 @@
       headers: { 
         'Content-Type': 'application/json', 
       },
+      credentials: 'include',
       body: JSON.stringify({ username, password })
     })
 
     if (res.status == 200) {
       let data = await res.json()
-      jwt.set(data.token)
       writeMessage('user sucessfully logged in', 'success')
-      goto('/home', {replaceState: true})
+      goto('/home')
       return
     } else {
       writeMessage(await res.text(), 'failed')
