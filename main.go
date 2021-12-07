@@ -29,7 +29,7 @@ func main() {
 
 	router(app)
 
-	app.Listen(":3000")
+	app.Listen(":5000")
 }
 
 func router(app *fiber.App) {
