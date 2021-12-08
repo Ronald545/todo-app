@@ -1,10 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { fade } from 'svelte/transition'
+  import { slide, fade } from 'svelte/transition'
   let server = 'http://localhost:5000'
   $: data = []
   let name = ''
   let description = ''
+
+  let edit : Boolean = false
+  let editedTask
+
+  let hasMessage = ''
+  let message = ''
 
   onMount(async () => {
     loadTasks()
@@ -19,13 +25,14 @@
     if (res.ok) {
       data = await res.json()  
     } else {
-      console.log(await res.text())
+      let d = await res.text() 
+      writeMessage(d, 'failed')     
     }
   }
 
   async function createTask() {
     if (name.length == 0 ) {
-      console.log()
+      writeMessage('name field cannot be empty', 'failed')
       return
     }
     let res = await fetch(server + "/task", {
@@ -38,10 +45,50 @@
     })
     
     if (res.ok) {
+      const task = await res.json()
+      data = [{ id: task.id, name, description }, ...data]
+    } else {
+      let d = await res.text()
+      writeMessage(d, 'failed')
+    }
+
+    name = ""
+    description = ""
+  }
+
+  async function editTask() {
+    if (name.length === 0) {
+      writeMessage('name field cannot be empty', 'failed')
+      return 
+    }
+    let res = await fetch(server + '/task', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {'Content-Type': 'application/json'} ,
+      body:JSON.stringify({
+        id: editedTask,
+        newDescription: description,
+        newName: name
+      })
+    })
+
+    if (res.ok) {
       loadTasks()
     } else {
-      console.log(await res.text())
+      let d = await res.text()
+      writeMessage(d, 'failed')
     }
+
+    name = ""
+    description = ""
+    edit = false
+  }
+
+  function toggleEditTask(task : any) {
+    editedTask = task.id
+    name = task.name
+    description = task.description
+    edit = true
   }
 
   async function deleteTask(task : any) {
@@ -55,8 +102,17 @@
       data.splice(data.indexOf(task), 1)
       data = [...data]
     } else {
-      console.log(await res.text())
+      let d = await res.text()
+      writeMessage(d, 'failed')
     }
+  }
+  
+  function writeMessage (text: string, stat: string) {
+    hasMessage = stat
+    message = text
+    setTimeout(() => {
+      hasMessage = ''
+    }, 5000)
   }
 </script>
 
@@ -72,12 +128,30 @@
         <p class="subtitle">Description</p>
         <input type="textarea" class="textarea is-primary" bind:value={description}>
     </label>
-    <button class="button is-primary" on:click|preventDefault={createTask}>Submit</button>
+
+    {#if edit}
+    <button class="button is-warning form-button" on:click|preventDefault={editTask} transition:slide>Edit</button>
+    <button class="button is-link form-button" transition:slide on:click|preventDefault={() => {
+      edit = false
+      name = ""
+      description = ""
+    }}> X </button>
+    {:else}
+    <button class="button is-primary form-button" on:click|preventDefault={createTask} transition:slide >Submit</button>
+    {/if}
+
+    {#if hasMessage === 'failed'}
+      <div class="notification is-danger">{message}</div>
+    {/if}
   </form>
 
   {#each data as task (task.id)}
-    <div class="content" transition:fade>
-      <blockquote> {task.name} , {task.description} <button class="button is-danger" on:click={() => deleteTask(task)}>Delete</button></blockquote>
+    <div class="content" in:slide out:fade>
+      <blockquote> 
+      <h2 class="subtitle">{task.name.toUpperCase()}</h2>
+      <p>{task.description}</p>
+
+      <button class="button is-danger" on:click={() => deleteTask(task)}>Delete</button> <button class="button is-warning" on:click={() => toggleEditTask(task)}>Edit</button></blockquote>
     </div>
   {/each}
 
@@ -85,15 +159,17 @@
 </div>
 
 <style>
-  blockquote {
-    height: 80px
-  }
-  button.is-danger {
-    float: right;
-    padding-top: 0
+  button.is-warning, button.is-danger {
+    margin-left: 15px;
   }
   button.is-primary {
     margin-top: 15px;
     margin-left: 15px;
+  }
+  button.form-button {
+    margin-top: 15px;
+  }
+  div.notification {
+    margin-top : 15px;
   }
 </style>

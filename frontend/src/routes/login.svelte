@@ -24,7 +24,6 @@
     })
 
     if (res.status == 200) {
-      let data = await res.json()
       writeMessage('user sucessfully logged in', 'success')
       goto('/home')
       return
