@@ -124,3 +124,16 @@ func DeleteUser(c *fiber.Ctx) error {
 
 	return respond(c, 200, "user deleted sucessfully")
 }
+
+func LoginStatus(c *fiber.Ctx) error {
+  return respond(c, 200, "user is logged in")
+}
+
+func LogOut(c *fiber.Ctx) error {
+  c.Status(200)
+  cookie := new(fiber.Cookie)
+  cookie.Name = "todo-auth"
+  cookie.Expires = time.Now()
+  c.Cookie(cookie)
+  return respond(c, 200, "user logged out")
+}

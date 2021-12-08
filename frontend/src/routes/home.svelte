@@ -1,12 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import { goto } from '$app/navigation'
   import { slide, fade } from 'svelte/transition'
   let server = 'http://localhost:5000'
   $: data = []
   let name = ''
   let description = ''
 
-  let edit : Boolean = false
+  let edit = false
   let editedTask
 
   let hasMessage = ''
@@ -106,6 +107,17 @@
       writeMessage(d, 'failed')
     }
   }
+
+  async function logOut() {
+    let res = await fetch(server + '/auth/logout', {
+      method: 'POST',
+      credentials: 'include'
+    })
+
+    if (res.ok) {
+      goto("/")
+    }
+  }
   
   function writeMessage (text: string, stat: string) {
     hasMessage = stat
@@ -118,6 +130,8 @@
 
 <div class="sector container">
   <h1 class="title is-1"> Todo List </h1>
+  
+  <button class="button is-link" on:click|preventDefault={logOut}>Log Out</button>
   
   <form class="box">
     <label for="name">

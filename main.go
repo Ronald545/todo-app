@@ -57,6 +57,8 @@ func router(app *fiber.App) {
 	auth := app.Group("/auth")
 
 	// tasks
+  api.Get("/verify", Handlers.LoginStatus)
+  
 	api.Get("/", Handlers.FindTask)
 
 	api.Post("/", Handlers.CreateTask)
@@ -70,6 +72,8 @@ func router(app *fiber.App) {
 	auth.Post("/login", Handlers.LoginUser)
 
 	auth.Post("/signup", Handlers.CreateUser)
+
+  auth.Post("/logout", Handlers.LogOut)
 
 	// dev
 	app.Get("/allTasks", Handlers.FindAllTasks)
