@@ -128,6 +128,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Home Page</title>
+</svelte:head>
+
 <div class="sector container">
   <h1 class="title is-1"> Todo List </h1>
   

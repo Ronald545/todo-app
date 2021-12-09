@@ -42,6 +42,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Login</title>
+</svelte:head>
+
 <div class="section">
   <form class="box is-centered">
     <h1 class="title">Login</h1>
