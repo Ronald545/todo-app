@@ -79,17 +79,33 @@ func CreateUser(c *fiber.Ctx) error {
 	if err := c.BodyParser(u); err != nil {
 		return respond(c, 400, "an error occured while parsing json body")
 	}
-	user, err := Models.NewUser(u.Username, u.Password)
 
-	if err != nil {
-		return respond(c, 500, err.Error())
-	}
+  User := &Models.User{}
+	coll := mgm.Coll(User)
+	result := []Models.User{}
 
-	if err := mgm.Coll(user).Create(user); err != nil {
-		return respond(c, 500, "an error occured while saving the user")
-	}
+	err := coll.SimpleFind(&result, bson.M{"username": u.Username})
+  
+  if err != nil {
+    respond(c, 500, err.Error())
+  }
+  
+  if len(result) == 0 {
+    user, err := Models.NewUser(u.Username, u.Password)
 
-	return respond(c, 200, "user sucessfully registered")
+    if err != nil {
+      return respond(c, 500, err.Error())
+    }
+
+    if err := mgm.Coll(user).Create(user); err != nil {
+      return respond(c, 500, "an error occured while saving the user")
+    }
+
+  } else if u.Username == result[0].Username {
+    return respond(c, 400, "username has been taken")
+  }
+
+  return respond(c, 200, "user sucessfully registered")
 }
 
 func DeleteUser(c *fiber.Ctx) error {
