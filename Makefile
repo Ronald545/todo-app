@@ -6,3 +6,6 @@ build:
 
 start:
 	concurrently "npm run preview --prefix=frontend" "./main"
+
+lint:
+	gofmt -w handlers/* models/* src/* main.go && npm run lint --prefix=frontend

@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Ronald545/todo-app/models"
+	Models "github.com/Ronald545/todo-app/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/kamva/mgm/v3"
@@ -62,15 +62,15 @@ func LoginUser(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-  
-  cookie := new(fiber.Cookie)
-  cookie.Name = "todo-auth"
-  cookie.Value = t
-  cookie.Expires = time.Now().Add(72 * time.Hour)
-  cookie.Domain = "localhost"
 
-  c.SendStatus(200)
-  c.Cookie(cookie)
+	cookie := new(fiber.Cookie)
+	cookie.Name = "todo-auth"
+	cookie.Value = t
+	cookie.Expires = time.Now().Add(72 * time.Hour)
+	cookie.Domain = "localhost"
+
+	c.SendStatus(200)
+	c.Cookie(cookie)
 	return c.JSON(fiber.Map{"token": t})
 }
 
@@ -80,32 +80,32 @@ func CreateUser(c *fiber.Ctx) error {
 		return respond(c, 400, "an error occured while parsing json body")
 	}
 
-  User := &Models.User{}
+	User := &Models.User{}
 	coll := mgm.Coll(User)
 	result := []Models.User{}
 
 	err := coll.SimpleFind(&result, bson.M{"username": u.Username})
-  
-  if err != nil {
-    respond(c, 500, err.Error())
-  }
-  
-  if len(result) == 0 {
-    user, err := Models.NewUser(u.Username, u.Password)
 
-    if err != nil {
-      return respond(c, 500, err.Error())
-    }
+	if err != nil {
+		respond(c, 500, err.Error())
+	}
 
-    if err := mgm.Coll(user).Create(user); err != nil {
-      return respond(c, 500, "an error occured while saving the user")
-    }
+	if len(result) == 0 {
+		user, err := Models.NewUser(u.Username, u.Password)
 
-  } else if u.Username == result[0].Username {
-    return respond(c, 400, "username has been taken")
-  }
+		if err != nil {
+			return respond(c, 500, err.Error())
+		}
 
-  return respond(c, 200, "user sucessfully registered")
+		if err := mgm.Coll(user).Create(user); err != nil {
+			return respond(c, 500, "an error occured while saving the user")
+		}
+
+	} else if u.Username == result[0].Username {
+		return respond(c, 400, "username has been taken")
+	}
+
+	return respond(c, 200, "user sucessfully registered")
 }
 
 func DeleteUser(c *fiber.Ctx) error {
@@ -142,14 +142,22 @@ func DeleteUser(c *fiber.Ctx) error {
 }
 
 func LoginStatus(c *fiber.Ctx) error {
-  return respond(c, 200, "user is logged in")
+	return respond(c, 200, "user is logged in")
 }
 
 func LogOut(c *fiber.Ctx) error {
-  c.Status(200)
-  cookie := new(fiber.Cookie)
-  cookie.Name = "todo-auth"
-  cookie.Expires = time.Now()
-  c.Cookie(cookie)
-  return respond(c, 200, "user logged out")
+	c.Status(200)
+	cookie := new(fiber.Cookie)
+	cookie.Name = "todo-auth"
+	cookie.Expires = time.Now()
+	c.Cookie(cookie)
+	return respond(c, 200, "user logged out")
+}
+
+func DeleteAllUsers(c *fiber.Ctx) error {
+	c.Status(200)
+	user := &Models.User{}
+	coll := mgm.Coll(user)
+	coll.DeleteMany(mgm.Ctx(), bson.M{})
+	return respond(c, 200, "all users deleted")
 }
